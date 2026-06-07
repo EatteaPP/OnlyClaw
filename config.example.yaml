@@ -39,6 +39,24 @@ logging:
   enabled: true
   path: "./workspace/logs"
 
+apps:
+  browsers:
+    edge:
+      executable_candidates:
+        - "msedge"
+        - "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe"
+        - "C:/Program Files/Microsoft/Edge/Application/msedge.exe"
+    chrome:
+      executable_candidates:
+        - "chrome"
+        - "C:/Program Files/Google/Chrome/Application/chrome.exe"
+        - "C:/Program Files (x86)/Google/Chrome/Application/chrome.exe"
+    firefox:
+      executable_candidates:
+        - "firefox"
+        - "C:/Program Files/Mozilla Firefox/firefox.exe"
+        - "C:/Program Files (x86)/Mozilla Firefox/firefox.exe"
+
 skills:
   enabled: true
   auto_execute_permissions:
