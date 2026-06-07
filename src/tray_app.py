@@ -57,7 +57,7 @@ class TrayApp:
         if self.window.isVisible():
             self.window.hide()
         else:
-            self.window.present()
+            self.window.show_and_focus(force_focus=True)
 
     def shutdown(self) -> None:
         if self.tray is None:

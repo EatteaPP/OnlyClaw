@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from src.core.intent import extract_app, extract_browser, extract_first_url
+from src.core.intent import contains_unsafe_scheme, extract_app, extract_browser, extract_first_url
 
 from .provider import AiProvider
 
@@ -13,6 +13,16 @@ class MockAiProvider(AiProvider):
         return f"[mock] {prompt}"
 
     def classify_intent(self, command: str, skill_index: list[dict[str, Any]]) -> dict[str, Any]:
+        if contains_unsafe_scheme(command):
+            return {
+                "status": "capability_not_available",
+                "intent": None,
+                "skill_name": None,
+                "confidence": 0.0,
+                "parameters": {},
+                "message": "The command contains an unsafe URL scheme and cannot be opened.",
+            }
+
         skill_names = {str(skill.get("name", "")).strip().lower(): skill for skill in skill_index}
         open_url_skill = skill_names.get("open-url")
         open_app_skill = skill_names.get("open-app")
@@ -96,19 +106,19 @@ class MockAiProvider(AiProvider):
             skill_name = str(result.get("skill_name", "")).strip()
 
         if status == "capability_not_available":
-            return "目前沒有符合的 skill。No Skill, No Action. 請建立新的 skill + script + executor."
+            return "No Skill, No Action. Please add a matching skill, script, and executor."
 
         if isinstance(execution, dict):
             success = bool(execution.get("success", False))
             message = str(execution.get("message", "")).strip()
             if success:
-                return f"已執行 {skill_name}：{message}"
-            return f"執行 {skill_name} 失敗：{message}"
+                return f"已執行 {skill_name}：{message}" if skill_name else message
+            return f"執行 {skill_name} 失敗：{message}" if skill_name else message
 
         if status == "matched":
-            return f"已處理 {skill_name}。"
+            return f"已處理 {skill_name}。" if skill_name else "已處理指令。"
 
         message = str(result.get("message", "")).strip()
         if message:
             return message
-        return "目前沒有符合的 skill。No Skill, No Action. 請建立新的 skill + script + executor."
+        return "No Skill, No Action. Please add a matching skill, script, and executor."

@@ -75,9 +75,9 @@ class AppController:
         if self.window.isVisible() and behavior.get("hide_on_hotkey_when_visible", True):
             self.window.hide()
         elif self.window.isVisible():
-            self.window.focus_input()
+            self.window.show_and_focus(force_focus=True)
         else:
-            self.window.present()
+            self.window.show_and_focus(force_focus=True)
 
     def reload_config(self) -> None:
         self.config = load_config()
@@ -96,7 +96,7 @@ class AppController:
         self.setup_hotkey()
 
         if self.window.isVisible():
-            self.window.focus_input()
+            self.window.show_and_focus(force_focus=True)
 
     def cleanup(self) -> None:
         if self._cleaned_up:

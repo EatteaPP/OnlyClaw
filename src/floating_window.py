@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QFocusEvent, QKeySequence, QShortcut
-from PySide6.QtCore import QTimer
-from PySide6.QtWidgets import QLineEdit, QMainWindow, QTextEdit, QVBoxLayout, QWidget
+from PySide6.QtCore import Qt, QTimer
+from PySide6.QtGui import QKeyEvent
+from PySide6.QtWidgets import QApplication, QLineEdit, QMainWindow, QTextEdit, QVBoxLayout, QWidget
 
 
 class FloatingWindow(QMainWindow):
@@ -11,8 +10,13 @@ class FloatingWindow(QMainWindow):
         super().__init__()
         self.config = config
         self.command_router = command_router
+        self._focus_tracking_connected = False
         self._build_ui()
+        self._setup_focus_tracking()
         self.apply_config(config)
+
+    def _behavior(self) -> dict:
+        return self.config.get("behavior", {})
 
     def _build_ui(self) -> None:
         central_widget = QWidget(self)
@@ -22,19 +26,22 @@ class FloatingWindow(QMainWindow):
 
         self.input_box = QLineEdit()
         self.input_box.setPlaceholderText("Enter a command...")
-        self.input_box.returnPressed.connect(self._submit_command)
+        self.input_box.returnPressed.connect(self.submit_command)
 
         self.result_box = QTextEdit()
         self.result_box.setReadOnly(True)
         self.result_box.setPlaceholderText("Results will appear here.")
 
-        self.escape_shortcut = QShortcut(QKeySequence("Escape"), self)
-        self.escape_shortcut.setContext(Qt.ShortcutContext.WindowShortcut)
-        self.escape_shortcut.activated.connect(self.hide)
-
         layout.addWidget(self.input_box)
         layout.addWidget(self.result_box)
         self.setCentralWidget(central_widget)
+
+    def _setup_focus_tracking(self) -> None:
+        app = QApplication.instance()
+        if app is None or self._focus_tracking_connected:
+            return
+        app.focusChanged.connect(self._on_focus_changed)
+        self._focus_tracking_connected = True
 
     def apply_config(self, config: dict) -> None:
         self.config = config
@@ -47,7 +54,6 @@ class FloatingWindow(QMainWindow):
 
         self.setWindowTitle(window_config.get("title", app_config.get("name", "OnlyClaw")))
         self.setWindowOpacity(float(window_config.get("opacity", 0.86)))
-        self.escape_shortcut.setEnabled(bool(config.get("behavior", {}).get("hide_on_escape", True)))
 
         flags = Qt.WindowType.Window
         if window_config.get("always_on_top", True):
@@ -90,59 +96,99 @@ class FloatingWindow(QMainWindow):
         if was_visible:
             self.show()
 
+    def keyPressEvent(self, event: QKeyEvent) -> None:  # noqa: N802
+        if event.key() == Qt.Key.Key_Escape and self._behavior().get("hide_on_escape", True):
+            self.hide()
+            event.accept()
+            return
+        super().keyPressEvent(event)
+
     def showEvent(self, event) -> None:  # noqa: N802
         super().showEvent(event)
-        self.focus_input()
 
-    def focusOutEvent(self, event: QFocusEvent) -> None:  # noqa: N802
-        super().focusOutEvent(event)
-        if self.config.get("behavior", {}).get("hide_on_lost_focus", True):
-            QTimer.singleShot(0, self._hide_if_not_active)
+    def focus_command_input(self, *, force: bool = False) -> None:
+        behavior = self._behavior()
+        if not force and not behavior.get("focus_textbox_on_show", True):
+            return
 
-    def _hide_if_not_active(self) -> None:
-        if not self.isActiveWindow() and self.isVisible():
-            self.hide()
+        self.input_box.setFocus(Qt.FocusReason.ActiveWindowFocusReason)
+        if behavior.get("select_all_text_on_show", True):
+            self.input_box.selectAll()
 
-    def focus_input(self) -> None:
-        behavior = self.config.get("behavior", {})
-        if behavior.get("focus_textbox_on_show", True):
-            self.input_box.setFocus()
-            if behavior.get("select_all_text_on_show", True):
-                self.input_box.selectAll()
-
-    def present(self) -> None:
+    def show_and_focus(self, *, force_focus: bool = True) -> None:
         self.show()
         self.raise_()
         self.activateWindow()
-        self.focus_input()
 
-    def _submit_command(self) -> None:
+        behavior = self._behavior()
+        delay_ms = int(behavior.get("focus_delay_ms", 80))
+        if force_focus or behavior.get("focus_textbox_on_show", True):
+            QTimer.singleShot(delay_ms, lambda: self.focus_command_input(force=True))
+
+    def present(self) -> None:
+        self.show_and_focus(force_focus=True)
+
+    def _focus_widget_is_inside_window(self, widget) -> bool:
+        if widget is None:
+            return False
+        if widget is self or widget is self.centralWidget():
+            return True
+        return self.isAncestorOf(widget)
+
+    def _on_focus_changed(self, old, new) -> None:
+        del old
+        behavior = self._behavior()
+        if not behavior.get("hide_on_lost_focus", True):
+            return
+        if not self.isVisible():
+            return
+        if self._focus_widget_is_inside_window(new):
+            return
+        QTimer.singleShot(120, self.hide_if_focus_outside)
+
+    def hide_if_focus_outside(self) -> None:
+        if not self.isVisible():
+            return
+
+        focused = QApplication.focusWidget()
+        if self._focus_widget_is_inside_window(focused):
+            return
+        self.hide()
+
+    def hide_if_not_active(self) -> None:
+        if self.isVisible() and not self.isActiveWindow():
+            self.hide()
+
+    def submit_command(self) -> None:
         command = self.input_box.text().strip()
         if not command:
             return
 
         result = self.command_router.handle(command)
         if isinstance(result, dict):
-            summary = str(result.get("summary") or result.get("message") or "")
-            if not summary and isinstance(result.get("execution"), dict):
-                execution = result["execution"]
-                success = bool(execution.get("success", False))
-                message = str(execution.get("message", "")).strip()
-                skill_info = result.get("skill")
-                skill_name = ""
-                if isinstance(skill_info, dict):
-                    skill_name = str(skill_info.get("name", "")).strip()
-                if not skill_name:
-                    skill_name = str(result.get("skill_name", "")).strip()
-
-                if success:
-                    summary = f"已執行 {skill_name}：{message}"
-                else:
-                    summary = f"執行 {skill_name} 失敗：{message}"
-
-            self.result_box.setPlainText(summary or str(result))
+            message = str(result.get("message") or result.get("summary") or "").strip()
+            success = bool(result.get("success", False))
         else:
-            self.result_box.setPlainText(str(result))
+            message = str(result)
+            success = False
 
-        if self.config.get("behavior", {}).get("hide_after_submit", False):
-            self.hide()
+        self.result_box.setPlainText(message or "No result returned.")
+
+        behavior = self._behavior()
+        hide_after_success = behavior.get("hide_after_successful_submit", behavior.get("hide_after_submit", True))
+        if success:
+            if behavior.get("clear_text_after_successful_submit", True):
+                self.input_box.clear()
+            elif behavior.get("clear_text_after_submit", False):
+                self.input_box.clear()
+
+            if hide_after_success:
+                delay_ms = int(behavior.get("hide_after_success_delay_ms", 300))
+                QTimer.singleShot(delay_ms, self.hide)
+        else:
+            if behavior.get("clear_text_after_submit", False):
+                self.input_box.clear()
+
+            if behavior.get("hide_after_failed_submit", False):
+                delay_ms = int(behavior.get("hide_after_success_delay_ms", 300))
+                QTimer.singleShot(delay_ms, self.hide)

@@ -9,7 +9,7 @@ try:  # pragma: no cover - optional dependency
 except Exception:  # pragma: no cover - optional dependency
     OpenAI = None  # type: ignore[assignment]
 
-from src.core.intent import extract_app, extract_browser, extract_first_url
+from src.core.intent import contains_unsafe_scheme, extract_app, extract_browser, extract_first_url
 
 from .mock_provider import MockAiProvider
 from .provider import AiProvider
@@ -151,6 +151,16 @@ class OpenAiProvider(AiProvider):
             return f"OpenAI provider error: {exc}"
 
     def classify_intent(self, command: str, skill_index: list[dict[str, Any]]) -> dict[str, Any]:
+        if contains_unsafe_scheme(command):
+            return {
+                "status": "capability_not_available",
+                "intent": None,
+                "skill_name": None,
+                "confidence": 0.0,
+                "parameters": {},
+                "message": "The command contains an unsafe URL scheme and cannot be opened.",
+            }
+
         url = extract_first_url(command)
         if url:
             skill_names = {str(skill.get("name", "")).strip().lower(): skill for skill in skill_index}

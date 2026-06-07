@@ -29,8 +29,14 @@ behavior:
   hide_on_lost_focus: true
   hide_on_hotkey_when_visible: true
   hide_after_submit: false
+  hide_after_successful_submit: true
+  hide_after_failed_submit: false
   focus_textbox_on_show: true
   select_all_text_on_show: true
+  focus_delay_ms: 80
+  hide_after_success_delay_ms: 300
+  clear_text_after_submit: false
+  clear_text_after_successful_submit: true
 
 workspace:
   path: "./workspace"
