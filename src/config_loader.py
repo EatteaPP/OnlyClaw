@@ -38,8 +38,11 @@ DEFAULT_CONFIG: dict[str, Any] = {
     },
     "behavior": {
         "hide_on_escape": True,
+        "hide_on_lost_focus": True,
+        "hide_on_hotkey_when_visible": True,
         "hide_after_submit": False,
         "focus_textbox_on_show": True,
+        "select_all_text_on_show": True,
     },
     "workspace": {
         "path": "./workspace",

@@ -1,57 +1,85 @@
 # OnlyClaw
 
-OnlyClaw 是一個基於「No Skill, No Action」原則的 Windows 桌面命令面板。
+OnlyClaw 是一個 Windows 常駐型桌面指令工具，遵守 **No Skill, No Action** 原則。
 
-## 核心原則
+如果沒有註冊過的 skill，OnlyClaw 就不應執行動作。
 
-No Skill, No Action。
+## 專案目標
 
-OnlyClaw 只會執行已註冊的 skill。  
-如果沒有對應 skill，就必須回報能力不足。
+OnlyClaw 不是通用型自主 AI Agent。
 
-## Skills
+它的角色很單純：
 
-Skill 放在：
+- 顯示浮動指令視窗
+- 監聽可設定的熱鍵
+- 將指令對應到已註冊的 skill
+- 透過 Executor 執行允許的本機 script
+- 回傳結構化結果
+- 寫入執行紀錄
+
+## Current Built-in Skills
+
+### open-app
+
+開啟允許清單中的本機應用程式。
+
+範例：
 
 ```text
-workspace/skills/
+open browser
+open edge
+open chrome
+open notepad
+open calculator
 ```
 
-每個 skill 應包含：
+### open-url
 
-- `SKILL.md`
-- `skill.yaml`
-- `scripts/`
-- `examples/`
+開啟 HTTP 或 HTTPS 網址。
 
-本版本內建 skill：
+範例：
 
-- `open-app`
-- `open-url`
+```text
+open https://www.google.com
+open edge https://github.com
+```
 
-## 執行流程
+## Window Behavior Configuration
 
-所有動作都必須經過：
+視窗行為可在 `config.yaml` 中設定：
 
-`Skill Registry` -> `Executor` -> `Script` -> `Structured Result`
+```yaml
+behavior:
+  hide_on_escape: true
+  hide_on_lost_focus: true
+  hide_on_hotkey_when_visible: true
+  focus_textbox_on_show: true
+  select_all_text_on_show: true
+```
 
-Executor 目前只支援 Python script，並且必須：
+啟用後，OnlyClaw 會像暫時性的 command palette：
 
-- 使用 `shell=False`
-- 透過 JSON stdin 傳入參數
-- 解析 JSON stdout
-- 寫入執行 log
+- 快速連按兩下 Ctrl 顯示視窗
+- 視窗顯示時再快速連按兩下 Ctrl 會隱藏
+- 按 Esc 會隱藏視窗
+- 失去焦點會隱藏視窗
 
-## 安全規則
+## Repository Status
 
-OnlyClaw 不得：
+這個專案目前是個個人 POC。
 
-- 執行任意 shell command
-- 使用 `shell=True`
-- 執行未註冊 skill
-- 開啟不支援的 URL scheme
-- 自動化瀏覽器後續操作
-- 點擊 UI
-- 提交表單
-- 登入網站
+目前重點：
 
+- Windows 桌面工具
+- skill registry
+- safe executor
+- mock provider
+- Gemini / OpenAI provider interface
+
+尚未實作：
+
+- production packaging
+- installer
+- voice input
+- enterprise authentication
+- advanced browser automation

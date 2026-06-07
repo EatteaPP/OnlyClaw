@@ -71,8 +71,11 @@ class AppController:
         self.hotkey_listener.start()
 
     def toggle_window(self) -> None:
-        if self.window.isVisible():
+        behavior = self.config.get("behavior", {})
+        if self.window.isVisible() and behavior.get("hide_on_hotkey_when_visible", True):
             self.window.hide()
+        elif self.window.isVisible():
+            self.window.focus_input()
         else:
             self.window.present()
 

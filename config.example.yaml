@@ -26,8 +26,11 @@ hotkey:
 
 behavior:
   hide_on_escape: true
+  hide_on_lost_focus: true
+  hide_on_hotkey_when_visible: true
   hide_after_submit: false
   focus_textbox_on_show: true
+  select_all_text_on_show: true
 
 workspace:
   path: "./workspace"

@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QKeySequence, QShortcut
+from PySide6.QtGui import QFocusEvent, QKeySequence, QShortcut
+from PySide6.QtCore import QTimer
 from PySide6.QtWidgets import QLineEdit, QMainWindow, QTextEdit, QVBoxLayout, QWidget
 
 
@@ -93,10 +94,21 @@ class FloatingWindow(QMainWindow):
         super().showEvent(event)
         self.focus_input()
 
+    def focusOutEvent(self, event: QFocusEvent) -> None:  # noqa: N802
+        super().focusOutEvent(event)
+        if self.config.get("behavior", {}).get("hide_on_lost_focus", True):
+            QTimer.singleShot(0, self._hide_if_not_active)
+
+    def _hide_if_not_active(self) -> None:
+        if not self.isActiveWindow() and self.isVisible():
+            self.hide()
+
     def focus_input(self) -> None:
-        if self.config.get("behavior", {}).get("focus_textbox_on_show", True):
+        behavior = self.config.get("behavior", {})
+        if behavior.get("focus_textbox_on_show", True):
             self.input_box.setFocus()
-            self.input_box.selectAll()
+            if behavior.get("select_all_text_on_show", True):
+                self.input_box.selectAll()
 
     def present(self) -> None:
         self.show()

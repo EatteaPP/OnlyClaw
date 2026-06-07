@@ -106,3 +106,23 @@ Tray menu:
 - Exit
 
 Use Exit to fully quit the application.
+
+## Window Behavior Configuration
+
+Window behavior can be configured in `config.yaml`.
+
+```yaml
+behavior:
+  hide_on_escape: true
+  hide_on_lost_focus: true
+  hide_on_hotkey_when_visible: true
+  focus_textbox_on_show: true
+  select_all_text_on_show: true
+```
+
+When enabled, OnlyClaw behaves like a temporary command palette:
+
+- Double Ctrl shows the window
+- Double Ctrl again hides the window
+- Esc hides the window
+- Losing focus hides the window
