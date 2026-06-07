@@ -1,0 +1,32 @@
+name: open-url
+description: Open a URL with the default browser or a specified browser.
+enabled: true
+permission: open-url
+triggers:
+  - open url
+  - url
+  - browser
+  - open browser
+  - http://
+  - https://
+  - open edge
+  - open chrome
+  - open firefox
+parameters:
+  url:
+    type: string
+    required: true
+  browser:
+    type: string
+    required: false
+    default: default
+    allowed:
+      - default
+      - edge
+      - chrome
+      - firefox
+execution:
+  type: python
+  script: scripts/run.py
+  timeout_seconds: 10
+

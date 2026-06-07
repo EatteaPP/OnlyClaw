@@ -1,0 +1,33 @@
+name: open-app
+description: Open an allowlisted local application.
+enabled: true
+permission: local-app-launch
+triggers:
+  - open app
+  - app
+  - open browser
+  - browser
+  - open edge
+  - edge
+  - microsoft edge
+  - chrome
+  - google chrome
+  - firefox
+  - notepad
+  - calculator
+parameters:
+  app:
+    type: string
+    required: true
+    allowed:
+      - default_browser
+      - edge
+      - chrome
+      - firefox
+      - notepad
+      - calculator
+execution:
+  type: python
+  script: scripts/run.py
+  timeout_seconds: 10
+

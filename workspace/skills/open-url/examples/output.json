@@ -1,0 +1,9 @@
+{
+  "success": true,
+  "message": "Opened URL with default browser: https://www.google.com",
+  "data": {
+    "url": "https://www.google.com",
+    "browser": "default"
+  }
+}
+

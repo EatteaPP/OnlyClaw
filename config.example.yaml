@@ -1,0 +1,71 @@
+app:
+  name: "OnlyClaw"
+  auto_show_on_startup: false
+  icon_path: "./assets/icons/onlyclaw.ico"
+
+tray:
+  enabled: true
+  tooltip: "OnlyClaw - Personal Command Widget"
+
+window:
+  title: "OnlyClaw"
+  opacity: 0.86
+  x: 1200
+  y: 120
+  width: 520
+  height: 180
+  always_on_top: true
+  frameless: true
+  show_taskbar_icon: true
+
+hotkey:
+  enabled: true
+  mode: "double_press"
+  key: "ctrl"
+  interval_ms: 450
+
+behavior:
+  hide_on_escape: true
+  hide_after_submit: false
+  focus_textbox_on_show: true
+
+workspace:
+  path: "./workspace"
+
+logging:
+  enabled: true
+  path: "./workspace/logs"
+
+skills:
+  enabled: true
+  auto_execute_permissions:
+    - read-only
+    - local-app-launch
+    - open-url
+  require_approval_permissions:
+    - approval-required
+    - dangerous
+
+ai:
+  enabled: true
+  default_provider: "mock"
+
+  providers:
+    mock:
+      enabled: true
+
+    openai:
+      enabled: true
+      api_key_env: "OPENAI_API_KEY"
+      model_env: "OPENAI_MODEL"
+      default_model: "gpt-5.4-mini"
+      temperature: 0.1
+      timeout_seconds: 60
+
+    gemini:
+      enabled: true
+      api_key_env: "GEMINI_API_KEY"
+      model_env: "GEMINI_MODEL"
+      default_model: "gemini-2.5-flash"
+      temperature: 0.1
+      timeout_seconds: 60
