@@ -1,8 +1,7 @@
 {
   "success": true,
-  "message": "Opened app: edge",
+  "message": "Opened app: calculator",
   "data": {
-    "app": "edge"
+    "app": "calculator"
   }
 }
-

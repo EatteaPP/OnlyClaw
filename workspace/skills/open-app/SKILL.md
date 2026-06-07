@@ -13,6 +13,20 @@ Open a local application from an allowlist.
 - `notepad`
 - `calculator`
 
+## Supported aliases
+
+`open-app` only accepts aliases registered in `skill.yaml`.
+
+Examples:
+
+- `browser` -> `default_browser`
+- `default browser` -> `default_browser`
+- `edge` -> `edge`
+- `msedge` -> `edge`
+- `chrome` -> `chrome`
+- `firefox` -> `firefox`
+- `calc` -> `calculator`
+
 ## When to use
 
 Use this skill when the user asks to open a local application.
@@ -25,6 +39,7 @@ Examples:
 - open firefox
 - open notepad
 - open calculator
+- open calc
 
 ## Parameters
 
@@ -47,4 +62,3 @@ This skill must not:
 - click UI elements
 - read application contents
 - submit forms
-
