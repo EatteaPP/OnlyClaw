@@ -2,6 +2,37 @@ name: open-app
 description: Open an allowlisted local application.
 enabled: true
 permission: local-app-launch
+apps:
+  default_browser:
+    aliases:
+      - browser
+      - default browser
+      - 瀏覽器
+      - 預設瀏覽器
+  edge:
+    aliases:
+      - edge
+      - microsoft edge
+      - msedge
+      - 微軟瀏覽器
+  chrome:
+    aliases:
+      - chrome
+      - google chrome
+  firefox:
+    aliases:
+      - firefox
+      - 火狐
+  notepad:
+    aliases:
+      - notepad
+      - 記事本
+  calculator:
+    aliases:
+      - calculator
+      - calc
+      - 小算盤
+      - 計算機
 triggers:
   - open app
   - app
@@ -30,4 +61,3 @@ execution:
   type: python
   script: scripts/run.py
   timeout_seconds: 10
-

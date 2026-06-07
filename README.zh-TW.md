@@ -83,3 +83,34 @@ behavior:
 - voice input
 - enterprise authentication
 - advanced browser automation
+
+## App Aliases
+
+`open-app` 支援在 `workspace/skills/open-app/skill.yaml` 中設定 app aliases。
+
+範例：
+
+```yaml
+apps:
+  calculator:
+    aliases:
+      - calculator
+      - calc
+      - 小算盤
+```
+
+因此：
+
+```text
+open calc
+```
+
+可以解析為：
+
+```json
+{
+  "app": "calculator"
+}
+```
+
+OnlyClaw 只允許已註冊的 aliases，不會自行猜測未註冊的應用程式。

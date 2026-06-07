@@ -2,7 +2,12 @@ from __future__ import annotations
 
 from typing import Any
 
-from src.core.intent import contains_unsafe_scheme, extract_app, extract_browser, extract_first_url
+from src.core.intent import (
+    contains_unsafe_scheme,
+    extract_browser,
+    extract_first_url,
+    extract_registered_app,
+)
 
 from .provider import AiProvider
 
@@ -41,7 +46,7 @@ class MockAiProvider(AiProvider):
                 "message": "Mock matched open-url skill",
             }
 
-        app = extract_app(command)
+        app, matched_alias = extract_registered_app(command, skill_index)
         if app and open_app_skill is not None:
             return {
                 "status": "matched",
@@ -51,7 +56,7 @@ class MockAiProvider(AiProvider):
                 "parameters": {
                     "app": app,
                 },
-                "message": "Mock matched open-app skill",
+                "message": f"Matched open-app by registered app alias: {matched_alias}",
             }
 
         command_lower = command.lower()
@@ -89,7 +94,7 @@ class MockAiProvider(AiProvider):
             "skill_name": None,
             "confidence": 0.0,
             "parameters": {},
-            "message": "No Skill, No Action.",
+            "message": "目前沒有符合的 app alias。No Skill, No Action.",
         }
 
     def summarize_result(self, command: str, result: dict[str, Any]) -> str:
@@ -106,7 +111,7 @@ class MockAiProvider(AiProvider):
             skill_name = str(result.get("skill_name", "")).strip()
 
         if status == "capability_not_available":
-            return "No Skill, No Action. Please add a matching skill, script, and executor."
+            return "目前沒有符合的 skill。No Skill, No Action. 請建立新的 skill + script + executor."
 
         if isinstance(execution, dict):
             success = bool(execution.get("success", False))
@@ -121,4 +126,4 @@ class MockAiProvider(AiProvider):
         message = str(result.get("message", "")).strip()
         if message:
             return message
-        return "No Skill, No Action. Please add a matching skill, script, and executor."
+        return "目前沒有符合的 skill。No Skill, No Action. 請建立新的 skill + script + executor."

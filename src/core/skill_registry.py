@@ -40,6 +40,10 @@ class SkillRegistry:
         if not isinstance(parameters, dict):
             parameters = {}
 
+        apps = payload.get("apps", {})
+        if not isinstance(apps, dict):
+            apps = {}
+
         triggers = payload.get("triggers", [])
         if isinstance(triggers, str):
             triggers = [triggers]
@@ -52,6 +56,7 @@ class SkillRegistry:
             "triggers": [str(trigger).strip() for trigger in triggers if str(trigger).strip()],
             "permission": str(payload.get("permission", "read-only")).strip() or "read-only",
             "parameters": parameters,
+            "apps": apps,
             "execution": execution,
             "enabled": enabled,
             "path": str(skill_file.parent.resolve()),

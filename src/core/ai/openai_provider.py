@@ -9,7 +9,12 @@ try:  # pragma: no cover - optional dependency
 except Exception:  # pragma: no cover - optional dependency
     OpenAI = None  # type: ignore[assignment]
 
-from src.core.intent import contains_unsafe_scheme, extract_app, extract_browser, extract_first_url
+from src.core.intent import (
+    contains_unsafe_scheme,
+    extract_browser,
+    extract_first_url,
+    extract_registered_app,
+)
 
 from .mock_provider import MockAiProvider
 from .provider import AiProvider
@@ -177,7 +182,7 @@ class OpenAiProvider(AiProvider):
                     "message": "Matched open-url by deterministic URL extraction",
                 }
 
-        app = extract_app(command)
+        app, matched_alias = extract_registered_app(command, skill_index)
         if app:
             skill_names = {str(skill.get("name", "")).strip().lower(): skill for skill in skill_index}
             if skill_names.get("open-app") is not None:
@@ -189,7 +194,7 @@ class OpenAiProvider(AiProvider):
                     "parameters": {
                         "app": app,
                     },
-                    "message": "Matched open-app by deterministic app extraction",
+                    "message": f"Matched open-app by registered app alias: {matched_alias}",
                 }
 
         client, error = self._client_or_error()

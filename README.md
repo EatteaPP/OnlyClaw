@@ -39,6 +39,36 @@ Built-in skills in this version:
 - `open-app`
 - `open-url`
 
+## App Aliases
+
+`open-app` supports aliases configured in `workspace/skills/open-app/skill.yaml`.
+
+Example:
+
+```yaml
+apps:
+  calculator:
+    aliases:
+      - calculator
+      - calc
+```
+
+This allows:
+
+```text
+open calc
+```
+
+to resolve to:
+
+```json
+{
+  "app": "calculator"
+}
+```
+
+Only registered aliases are allowed. OnlyClaw must not guess unregistered applications.
+
 Triggers are declared in `skill.yaml` and used by the AI provider to map a command to a registered skill.
 
 ## Execution
